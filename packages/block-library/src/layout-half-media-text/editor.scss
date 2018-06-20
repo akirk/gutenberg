@@ -1,0 +1,32 @@
+.half-media {
+	display: grid;
+	grid-template-columns: min-content;
+	grid-template-rows: auto;
+	grid-template-areas: "half-media-media half-media-content";
+	align-items: center;
+	column-gap: 25px;
+}
+
+.block-library-half-media__resizer {
+	grid-area: half-media-media;
+}
+
+.half-media .editor-inner-blocks {
+	grid-area: half-media-content;
+}
+
+.block-library-half-media__resize-handler-right {
+	display: block;
+	border-radius: 50%;
+	border: 2px solid $white;
+	width: 16px !important;
+	height: 16px !important;
+	position: absolute;
+	background: theme(primary);
+}
+
+/*!rtl:begin:ignore*/
+.block-library-half-media__resize-handler-right {
+	top: calc(50% - 9px) !important;
+	right: -8px !important;
+}
