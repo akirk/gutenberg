@@ -358,7 +358,7 @@ export class BlockListBlock extends Component {
 			block,
 			order,
 			mode,
-			hasFixedToolbar,
+			isFocusMode,
 			isLocked,
 			isFirst,
 			isLast,
@@ -371,7 +371,6 @@ export class BlockListBlock extends Component {
 			isTypingWithinBlock,
 			isMultiSelecting,
 			hoverArea,
-			isLargeViewport,
 			isEmptyDefaultBlock,
 			isMovable,
 			isPreviousBlockADefaultEmptyBlock,
@@ -389,13 +388,14 @@ export class BlockListBlock extends Component {
 		// Empty paragraph blocks should always show up as unselected.
 		const showEmptyBlockSideInserter = ( isSelected || isHovered ) && isEmptyDefaultBlock;
 		const showSideInserter = ( isSelected || isHovered ) && isEmptyDefaultBlock;
-		const shouldAppearSelected = ! showSideInserter && isSelected && ! isTypingWithinBlock;
-		const shouldAppearSelectedParent = ! showSideInserter && hasSelectedInnerBlock && ! isTypingWithinBlock;
+		const shouldAppearSelected = ! isFocusMode && ! showSideInserter && isSelected && ! isTypingWithinBlock;
+		const shouldAppearSelectedParent = ! isFocusMode && ! showSideInserter && hasSelectedInnerBlock && ! isTypingWithinBlock;
+		const shouldAppearHovered = ! isFocusMode && isHovered && ! isEmptyDefaultBlock;
 		// We render block movers and block settings to keep them tabbale even if hidden
 		const shouldRenderMovers = ( isSelected || hoverArea === 'left' ) && ! showEmptyBlockSideInserter && ! isMultiSelecting && ! isPartOfMultiSelection && ! isTypingWithinBlock;
 		const shouldRenderBlockSettings = ( isSelected || hoverArea === 'right' ) && ! isMultiSelecting && ! isPartOfMultiSelection;
 		const shouldShowBreadcrumb = isHovered && ! isEmptyDefaultBlock;
-		const shouldShowContextualToolbar = ! showSideInserter && ( ( isSelected && ! isTypingWithinBlock && isValid ) || isFirstMultiSelected ) && ( ! hasFixedToolbar || ! isLargeViewport );
+		const shouldShowContextualToolbar = ! isFocusMode && ! showSideInserter && ( ( isSelected && ! isTypingWithinBlock && isValid ) || isFirstMultiSelected );
 		const shouldShowMobileToolbar = shouldAppearSelected;
 		const { error, dragging } = this.state;
 
@@ -411,7 +411,7 @@ export class BlockListBlock extends Component {
 			'is-selected': shouldAppearSelected,
 			'is-multi-selected': isPartOfMultiSelection,
 			'is-selected-parent': shouldAppearSelectedParent,
-			'is-hovered': isHovered && ! isEmptyDefaultBlock,
+			'is-hovered': shouldAppearHovered,
 			'is-reusable': isReusableBlock( blockType ),
 			'is-hidden': dragging,
 			'is-typing': isTypingWithinBlock,
@@ -588,7 +588,7 @@ export class BlockListBlock extends Component {
 	}
 }
 
-const applyWithSelect = withSelect( ( select, { clientId, rootClientId } ) => {
+const applyWithSelect = withSelect( ( select, { clientId, rootClientId, isLargeViewport } ) => {
 	const {
 		isBlockSelected,
 		getPreviousBlockClientId,
@@ -634,10 +634,10 @@ const applyWithSelect = withSelect( ( select, { clientId, rootClientId } ) => {
 		isPreviousBlockADefaultEmptyBlock: previousBlock && isUnmodifiedDefaultBlock( previousBlock ),
 		isMovable: 'all' !== templateLock,
 		isLocked: !! templateLock,
+		isFocusMode: hasFixedToolbar && isLargeViewport,
 		previousBlockClientId,
 		block,
 		isSelected,
-		hasFixedToolbar,
 	};
 } );
 
@@ -693,9 +693,9 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps ) => {
 } );
 
 export default compose(
+	withViewportMatch( { isLargeViewport: 'medium' } ),
 	applyWithSelect,
 	applyWithDispatch,
-	withViewportMatch( { isLargeViewport: 'medium' } ),
 	withFilters( 'editor.BlockListBlock' ),
 	withHoverAreas,
 )( BlockListBlock );
