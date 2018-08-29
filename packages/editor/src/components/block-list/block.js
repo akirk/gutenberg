@@ -376,6 +376,7 @@ export class BlockListBlock extends Component {
 			isMovable,
 			isPreviousBlockADefaultEmptyBlock,
 			hasSelectedInnerBlock,
+			isParentOfSelectedBlock,
 		} = this.props;
 		const isHovered = this.state.isHovered && ! isMultiSelecting;
 		const { name: blockName, isValid } = block;
@@ -416,7 +417,8 @@ export class BlockListBlock extends Component {
 			'is-reusable': isReusableBlock( blockType ),
 			'is-hidden': dragging,
 			'is-typing': isTypingWithinBlock,
-			'is-not-focused': isFocusMode && ! isSelected,
+			'is-focused': isFocusMode && ( isSelected || isParentOfSelectedBlock ),
+			'is-focus-mode': isFocusMode,
 		} );
 
 		const { onReplace } = this.props;
@@ -611,19 +613,19 @@ const applyWithSelect = withSelect( ( select, { clientId, rootClientId, isLargeV
 		getTemplateLock,
 	} = select( 'core/editor' );
 	const isSelected = isBlockSelected( clientId );
-	const isParentOfSelectedBlock = hasSelectedInnerBlock( clientId );
 	const { hasFixedToolbar, focusMode } = getEditorSettings();
 	const block = getBlock( clientId );
 	const previousBlockClientId = getPreviousBlockClientId( clientId );
 	const previousBlock = getBlock( previousBlockClientId );
 	const templateLock = getTemplateLock( rootClientId );
+	const isParentOfSelectedBlock = hasSelectedInnerBlock( clientId, true );
 
 	return {
 		nextBlockClientId: getNextBlockClientId( clientId ),
 		isPartOfMultiSelection: isBlockMultiSelected( clientId ) || isAncestorMultiSelected( clientId ),
 		isFirstMultiSelected: isFirstMultiSelectedBlock( clientId ),
 		isMultiSelecting: isMultiSelecting(),
-		hasSelectedInnerBlock: isParentOfSelectedBlock,
+		hasSelectedInnerBlock: hasSelectedInnerBlock( clientId, false ),
 		// We only care about this prop when the block is selected
 		// Thus to avoid unnecessary rerenders we avoid updating the prop if the block is not selected.
 		isTypingWithinBlock: ( isSelected || isParentOfSelectedBlock ) && isTyping(),
@@ -641,6 +643,7 @@ const applyWithSelect = withSelect( ( select, { clientId, rootClientId, isLargeV
 		previousBlockClientId,
 		block,
 		isSelected,
+		isParentOfSelectedBlock,
 	};
 } );
 
