@@ -359,6 +359,7 @@ export class BlockListBlock extends Component {
 			order,
 			mode,
 			isFocusMode,
+			hasFixedToolbar,
 			isLocked,
 			isFirst,
 			isLast,
@@ -395,7 +396,7 @@ export class BlockListBlock extends Component {
 		const shouldRenderMovers = ( isSelected || hoverArea === 'left' ) && ! showEmptyBlockSideInserter && ! isMultiSelecting && ! isPartOfMultiSelection && ! isTypingWithinBlock;
 		const shouldRenderBlockSettings = ( isSelected || hoverArea === 'right' ) && ! isMultiSelecting && ! isPartOfMultiSelection;
 		const shouldShowBreadcrumb = isHovered && ! isEmptyDefaultBlock;
-		const shouldShowContextualToolbar = ! isFocusMode && ! showSideInserter && ( ( isSelected && ! isTypingWithinBlock && isValid ) || isFirstMultiSelected );
+		const shouldShowContextualToolbar = ! hasFixedToolbar && ! showSideInserter && ( ( isSelected && ! isTypingWithinBlock && isValid ) || isFirstMultiSelected );
 		const shouldShowMobileToolbar = shouldAppearSelected;
 		const { error, dragging } = this.state;
 
@@ -610,7 +611,7 @@ const applyWithSelect = withSelect( ( select, { clientId, rootClientId, isLargeV
 	} = select( 'core/editor' );
 	const isSelected = isBlockSelected( clientId );
 	const isParentOfSelectedBlock = hasSelectedInnerBlock( clientId );
-	const { hasFixedToolbar } = getEditorSettings();
+	const { hasFixedToolbar, focusMode } = getEditorSettings();
 	const block = getBlock( clientId );
 	const previousBlockClientId = getPreviousBlockClientId( clientId );
 	const previousBlock = getBlock( previousBlockClientId );
@@ -634,7 +635,8 @@ const applyWithSelect = withSelect( ( select, { clientId, rootClientId, isLargeV
 		isPreviousBlockADefaultEmptyBlock: previousBlock && isUnmodifiedDefaultBlock( previousBlock ),
 		isMovable: 'all' !== templateLock,
 		isLocked: !! templateLock,
-		isFocusMode: hasFixedToolbar && isLargeViewport,
+		isFocusMode: focusMode && isLargeViewport,
+		hasFixedToolbar: hasFixedToolbar && isLargeViewport,
 		previousBlockClientId,
 		block,
 		isSelected,
