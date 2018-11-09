@@ -171,6 +171,18 @@ function gutenberg_render_block( $block ) {
 	return '';
 }
 
+if ( ! function_exists( '_restore_wpautop_hook' ) ) {
+	function _restore_wpautop_hook( $content ) {
+		global $wp_filter;
+		$current_priority = $wp_filter['the_content']->current_priority();
+
+		add_filter( 'the_content', 'wpautop', $current_priority - 1 );
+		remove_filter( 'the_content', '_restore_wpautop_hook', $current_priority );
+
+		return $content;
+	}
+}
+
 if ( ! function_exists( 'do_blocks' ) ) {
 	/**
 	 * Parses dynamic blocks out of `post_content` and re-renders them.
@@ -182,6 +194,13 @@ if ( ! function_exists( 'do_blocks' ) ) {
 	 * @return string          Updated post content.
 	 */
 	function do_blocks( $content ) {
+		// If there are blocks in this content, we shouldn't run wpautop() on it later.
+		$priority = has_filter( 'the_content', 'wpautop' );
+		if ( false !== $priority && doing_filter( 'the_content' ) && has_blocks( $content ) ) {
+			remove_filter( 'the_content', 'wpautop', $priority );
+			add_filter( 'the_content', '_restore_wpautop_hook', $priority + 1 );
+		}
+
 		global $post;
 
 		$rendered_content      = '';
