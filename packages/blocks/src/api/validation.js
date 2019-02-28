@@ -636,6 +636,12 @@ export function isValidBlockContent( blockTypeOrName, attributes, innerHTML ) {
 		return false;
 	}
 
+	let { prepareHTMLForValidation } = blockType;
+	if ( 'function' === typeof prepareHTMLForValidation ) {
+		innerHTML = prepareHTMLForValidation( innerHTML );
+		saveContent = prepareHTMLForValidation( saveContent );
+	}
+
 	const isValid = isEquivalentHTML( innerHTML, saveContent );
 	if ( ! isValid ) {
 		log.error(
