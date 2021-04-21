@@ -62,6 +62,15 @@ function mapMenuItemsToBlocks( menuItems ) {
 			attributes.url = menuItem.url;
 		}
 
+		if (
+			'post-type' === menuItem.type &&
+			menuItem.object &&
+			menuItem.object_id
+		) {
+			attributes.type = menuItem.object;
+			attributes.id = menuItem.object_id;
+		}
+
 		if ( menuItem.description ) {
 			attributes.description = menuItem.description;
 		}
